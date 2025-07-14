@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insightfulmessages"
+version = "0.1.0"
+description = "Classes for passing messages between apps with a focus on use for the processing of medical imaging data"
+authors = [
+    {name = "Jeffrey Duda", email = "jeff.duda@gmail.com"}
+]
+license = {text = "CC BY-NC-SA 4.0"}
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.urls]
+"Homepage" = "https://github.com/pennainsights/insightfulmessages"
