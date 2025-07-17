@@ -3,6 +3,10 @@ Helper classes to created structured message for use with RabbitMQ
 
 
 ## Features
+* Each message has a 'role' and a 'content' field
+* Python classes are used to represent the message and content allowing for the use of dot-notation
+* Classes generate json-parseable string via str()
+* A helper function for each class allows each class to be initialized from a json string
 
 ## Installation
 
