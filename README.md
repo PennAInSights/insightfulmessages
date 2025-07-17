@@ -13,7 +13,7 @@ You can install the package via  **source**
 
 ```bash
 git clone https://github.com/PennAInSights/insightfulmessages.git
-cd tombstone
+cd insightfulmessages
 pip install .
 ```
 
