@@ -61,3 +61,35 @@ msg_str = str(msg)
 
 ```
 
+msg_str now contains the following json data
+
+```yaml
+{
+"role":"user",
+"content": {
+    "content_type":"DCM",
+    "timestamp":"2025-07-15 16:55:02.856232",
+    "operation":"C-STORE",
+    "op_parameters":{
+        "content_type": "FILEDIR",
+        "timestamp":"2025-07-15 17:56:56.757643",
+        "file":"/path/to/file.dcm"
+        },
+    "connection": {
+        "dimse_timeout":"None",
+        "socket_timeout":60,
+        "acse_timeout":30
+        },
+    "sender": {
+        "ae_title":"SCU",
+        "addr":"localhost",
+        "port":0
+        },
+    "receiver": {
+        "ae_title":"SCP",
+        "addr":"localhost",
+        "port":4242
+        }
+    }
+}
+```
