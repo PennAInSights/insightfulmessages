@@ -1,4 +1,4 @@
-# insightfulmessage
+# insightfulmessages
 Helper classes to created structured message for use with RabbitMQ
 
 
