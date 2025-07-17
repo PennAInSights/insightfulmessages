@@ -63,7 +63,7 @@ msg_str = str(msg)
 
 msg_str now contains the following json data
 
-```yaml
+```json
 {
 "role":"user",
 "content": {
