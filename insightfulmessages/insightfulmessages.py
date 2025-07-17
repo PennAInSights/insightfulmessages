@@ -5,26 +5,41 @@ from typing import Union
 class InsightfulMessageContent:
 
     def __init__(self, 
-        content_type: str, 
-        timestamp: str | None = None):
+        content_type: str | None = None, 
+        timestamp: str | None = None,
+        dat: dict | None = None):
 
-        if timestamp is None:
-            self._timestamp = datetime.now()
+        if dat is not None:
+            if not 'role' in dat:
+                raise ValueError('Missing "role" field')
+            self.role = dat['role']
+
+            if not 'content' in dat:
+                raise ValueError('Missing "content" field')
+
+            if not 'content_type' in dat['content']:
+                raise ValueError('Missing "content_type" in "content"')
+
         else:
-            self._timestamp = timestamp
-
-        self._content_type = content_type
+            if timestamp is None:
+                self._timestamp = datetime.now()
+            else:
+                self._timestamp = timestamp
+            self._content_type = content_type
 
     @property 
     def content_type(self):
+        """Provide context for the content"""
         return self._content_type
 
     @content_type.setter
     def content_type(self, value: str):
+        print("setting content type: "+value )
         self._content_type = value
 
     @property
     def timestamp(self):
+        """Set timestamp for message (default=now)"""
         return self._timestamp
 
     @timestamp.setter
@@ -39,7 +54,6 @@ class GenericContent(InsightfulMessageContent):
         timestamp = None):
 
         super(StringContent, self).__init__('GENERIC', timestamp)
-
         self.value = value
 
     @property
@@ -61,6 +75,12 @@ class StringContent(InsightfulMessageContent):
 
         self.value = value
 
+    def __str__(self):
+        """convert to loadable json"""
+        out_str = f'"content_type": "STRING", "value": "{self.value}"'
+        out_str = '{'+out_str+'}'
+        return(out_str)
+
     @property
     def value(self):
         return(self._value)
@@ -71,6 +91,19 @@ class StringContent(InsightfulMessageContent):
             raise ValueError("Input must be a string")
         self._value = value
 
+    def from_json(self, json: dict):
+        super(StringContent, self).from_json(json)
+
+        if 'content_type' not in json['content']:
+            raise ValueError('Missing "content_type" field')
+
+        if json['content']['content_type'] != "STRING":
+            raise ValueError('Wrong content_type StringContent: {json["content"]["content_type"]}')
+
+        if 'value' not in json['content']:
+            raise ValueError('Missing value')
+
+        self.value = str(json['content']['value'])
 
 class FileDirContent(InsightfulMessageContent):
 
@@ -100,7 +133,6 @@ class FileDirContent(InsightfulMessageContent):
         if bad_init:
             raise ValueError("Can only set one of file, file_list, directory, directory_list")
         
-
         self._file = file
 
         self._file_list = file_list
@@ -109,6 +141,24 @@ class FileDirContent(InsightfulMessageContent):
 
         self._directory_list = directory_list
     
+    def __str__(self):
+        """convert to json loadable string"""
+        out_str = f'"content_type": "FILEDIR","timestamp":"{self.timestamp}"'
+        if self.file is not None:
+            out_str = out_str + f',"file":"{self.file}"'
+        if self.directory is not None:
+            out_str = out_str + f',"directory":"{self.directory}"'
+        if self.file_list is not None:
+            out_str = out_str + ',"file_list":['
+            out_str = out_str + '"' + '","'.join(self.file_list) + '"'
+            out_str = out_str + ']'
+        if self.directory_list is not None:
+            out_str = out_str + ',"directory_list":['
+            out_str = out_str + '"' + '","'.join(self.directory_list) + '"'
+            out_str = out_str + ']'
+        out_str = '{'+out_str+'}'
+        return(out_str)
+
     @property
     def file(self):
         return self._file
@@ -142,18 +192,33 @@ class FileDirContent(InsightfulMessageContent):
     def directory_list(self, value: list[str]):
         self._directory_list = value
 
+def FileDirContentLoad(input: dict):
+    fdc = FileDirContent(timestamp=input['timestamp'])
+    if 'file' in input:
+        fdc.file = input['file']
+
+    return(fdc)
+
+
 class InsightfulMessage:
-    def __init__(self, role: str, content: str | dict):
+    def __init__(self, 
+        role: str | None = None, 
+        content: str | dict = None):
+
+        self._role=None
+        self._content=None
 
         # base directory to start monitoring
-        self.role = role
+        if role is not None:
+            self.role = role
 
-        self.content = content
-
+        if content is not None:
+            self.content = content
 
     def __str__(self):
         content_str = str(self.content)
-        out_str = f'{"role": {self.role}, "content": {content_str}}'
+        out_str = f'{{"role":"{self.role}","content":{content_str}}}'
+        #out_str = '{' + out_str + '}'
         return(out_str)
 
     @property 
@@ -177,8 +242,13 @@ class InsightfulMessage:
             try:
                 self._content = json.loads(value)
             except:
-                self._content = value
+                self._content = str(value)
         else:
             self._content = value
 
-    
+def insightful_message_from_dict(dat: dict):
+
+    msg = InsighfulMessageContent(json=json)
+
+    if dat['content']['content_type']=="STRING":
+        msg=StringContent.load_json(json)
